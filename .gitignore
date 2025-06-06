@@ -1,0 +1,18 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Additional
+imc2024-1st-place-solution.ipynb
+imc-understanding-the-baseline.ipynb
+.python-version
+
+# Secrets
+credentials/
