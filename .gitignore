@@ -16,3 +16,6 @@ imc-understanding-the-baseline.ipynb
 
 # Secrets
 credentials/
+
+# Binaries
+/data
