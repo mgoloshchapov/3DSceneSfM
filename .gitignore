@@ -17,6 +17,8 @@ sample_test_features/
 colmap.db
 colmap.db-shm
 colmap.db-wal
+notebooks/
+incremental_pipeline_outputs/
 
 # Secrets
 credentials/

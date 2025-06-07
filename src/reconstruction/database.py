@@ -181,7 +181,7 @@ class COLMAPDatabase(sqlite3.Connection):
         if prior_q is None:
             prior_q = np.zeros(4)
         if prior_t is None:
-            np.zeros(3)
+            prior_t = np.zeros(3)
 
         cursor = self.execute(
             "INSERT OR REPLACE INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",

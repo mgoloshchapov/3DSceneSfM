@@ -7,6 +7,9 @@ from src.features.keypoints import detect_keypoints
 from src.features.matching import get_image_pairs
 from src.reconstruction.colmap_utils import import_into_colmap
 
+import numpy as np
+import open3d as o3d
+
 
 def main():
     images_list = list(Path("data/test/church/images/").glob("*.png"))[:10]
@@ -50,6 +53,32 @@ def main():
             sep="\n",
         )
         print()
+
+    reconstruction = maps[0]
+
+    # Extract 3D points
+    points = np.array([p.xyz for p in reconstruction.points3D.values()])
+
+    # Extract camera centers
+    camera_centers = np.array(
+        [img.projection_center() for img in reconstruction.images.values()]
+    )
+
+    # Create point cloud for reconstructed points
+    pcd_points = o3d.geometry.PointCloud()
+    pcd_points.points = o3d.utility.Vector3dVector(points)
+    pcd_points.paint_uniform_color([0.0, 0.8, 0.0])  # green points clearly
+
+    # Create point cloud for camera positions
+    pcd_cameras = o3d.geometry.PointCloud()
+    pcd_cameras.points = o3d.utility.Vector3dVector(camera_centers)
+    pcd_cameras.paint_uniform_color([1.0, 0.0, 0.0])  # red camera centers clearly
+
+    # Coordinate frame for reference
+    coord_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0)
+
+    # Visualize clearly
+    o3d.visualization.draw_geometries([pcd_points, pcd_cameras, coord_frame])
 
 
 def test_db():
