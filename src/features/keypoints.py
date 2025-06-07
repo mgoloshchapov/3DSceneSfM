@@ -12,7 +12,7 @@ from src.data.load import load_torch_image
 def detect_keypoints(
     paths: list[Path],
     feature_dir: Path,
-    num_features: int = 4096,
+    num_features: int = 2 * 4096,
     resize_to: int = 1024,
     device: torch.device = None,
 ) -> None:

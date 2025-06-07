@@ -16,7 +16,7 @@ def get_pairs_exhaustive(lst: list[Any]) -> list[tuple[int, int]]:
 def get_image_pairs(
     paths: list[Path],
     model_name: str,
-    similarity_threshold: float = 0.6,
+    similarity_threshold: float = 2.0,
     tolerance: int = 1000,
     min_matches: int = 20,
     exhaustive_if_less: int = 20,

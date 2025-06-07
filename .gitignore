@@ -19,6 +19,7 @@ colmap.db-shm
 colmap.db-wal
 notebooks/
 incremental_pipeline_outputs/
+misc/
 
 # Secrets
 credentials/
