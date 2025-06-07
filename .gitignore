@@ -13,6 +13,10 @@ wheels/
 imc2024-1st-place-solution.ipynb
 imc-understanding-the-baseline.ipynb
 .python-version
+sample_test_features/
+colmap.db
+colmap.db-shm
+colmap.db-wal
 
 # Secrets
 credentials/
