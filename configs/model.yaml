@@ -1,0 +1,19 @@
+pair_matching_args:
+  model_name: "facebook/dinov2-base"
+  similarity_threshold: 0.3
+  tolerance: 500
+  min_matches: 50
+  exhaustive_if_less: 50
+  p: 2.0
+
+keypoint_detection_args:
+  num_features: 4096
+  resize_to: 1024
+
+keypoint_distances_args:
+  min_matches: 15
+  verbose: False
+
+colmap_mapper_options:
+  min_model_size: 3
+  max_num_models: 2

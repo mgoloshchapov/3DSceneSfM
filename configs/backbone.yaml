@@ -1,0 +1,19 @@
+resnet18:
+  module: torchvision.models
+  class_name: resnet18
+  output_features: 512
+
+googlenet:
+  module: torchvision.models
+  class_name: googlenet
+  output_features: 1024
+
+mobilenet_v3_small:
+  module: torchvision.models
+  class_name: mobilenet_v3_small
+  output_features: 576
+
+efficientnet_b0:
+  module: torchvision.models
+  class_name: efficientnet_b0
+  output_features: 1280

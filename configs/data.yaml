@@ -1,0 +1,17 @@
+data:
+  reconstruction:
+    input_data_path: ./data/test/church/images/
+    output_data_path: ./results/
+    database_path: ${data.reconstruction.output_data_path}/colmap.db
+    reconstruction_path: ${data.reconstruction.output_data_path}/colmap_rec_aliked/
+
+  data_root: ${hydra:runtime.cwd}/data/
+
+  landmarks:
+    dataset_dir: ${data.data_root}/google_landmarks_v2/
+    metadata_path: ${data.landmarks.dataset_dir}/train.csv
+    data_dir_url: https://s3.amazonaws.com/google-landmark/train/
+    data_name:
+      - images_000.tar
+      - images_001.tar
+      - images_002.tar

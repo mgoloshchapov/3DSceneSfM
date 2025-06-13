@@ -1,0 +1,18 @@
+defaults:
+  - data: data # points to data.yaml
+  - _self_
+
+trainer:
+  max_epochs: 10
+  accelerator: auto
+  devices: 1
+
+model:
+  backbone: resnet18
+  lr: 0.001
+  pretrained: true
+
+datamodule:
+  batch_size: 64
+  img_size: 128
+  num_workers: 4

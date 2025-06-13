@@ -1,0 +1,8 @@
+defaults:
+  - _self_
+  - data
+
+backbone:
+  name: efficientnet_b0
+
+model:

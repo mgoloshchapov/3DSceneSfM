@@ -25,4 +25,5 @@ misc/
 credentials/
 
 # Binaries
+/outputs
 /data
