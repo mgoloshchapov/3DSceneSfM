@@ -10,6 +10,16 @@ from torch.utils.data import Dataset, DataLoader
 from pathlib import Path
 from PIL import Image
 import random
+from omegaconf import OmegaConf
+
+
+def get_backbone_config(backbone_name: str, config_path: Path) -> OmegaConf:
+    """Load backbone configuration by name."""
+    all_cfg = OmegaConf.load(config_path)
+    cfg = all_cfg.get(backbone_name)
+    if cfg is None:
+        raise ValueError(f"Backbone {backbone_name} not found in {config_path}")
+    return cfg
 
 
 class RotationDataset(Dataset):
@@ -34,11 +44,18 @@ class RotationDataset(Dataset):
 
 
 class RotationDataModule(L.LightningDataModule):
-    def __init__(self, image_dir: str, batch_size: int = 64, img_size: int = 128):
+    def __init__(
+        self,
+        image_dir: str,
+        batch_size: int = 64,
+        img_size: int = 128,
+        num_workers: int = 4,
+    ):
         super().__init__()
         self.image_dir = Path(image_dir)
         self.batch_size = batch_size
         self.img_size = img_size
+        self.num_workers = num_workers
 
         self.transform = transforms.Compose(
             [
@@ -58,19 +75,25 @@ class RotationDataModule(L.LightningDataModule):
 
     def train_dataloader(self):
         return DataLoader(
-            self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4
+            self.train_dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
         )
 
     def val_dataloader(self):
         return DataLoader(
-            self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=4
+            self.val_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
         )
 
 
-def load_backbone_from_config(cfg):
+def load_backbone_from_config(cfg, pretrained: bool = True):
     module = importlib.import_module(cfg.module)
     backbone_class = getattr(module, cfg.class_name)
-    model = backbone_class(pretrained=cfg._parent_.model.pretrained)
+    model = backbone_class(pretrained=pretrained)
 
     if hasattr(model, "fc"):
         model.fc = nn.Identity()
@@ -85,7 +108,9 @@ class RotationClassifier(L.LightningModule):
         super().__init__()
         self.save_hyperparameters(ignore=["backbone_cfg"])
 
-        self.backbone, features = load_backbone_from_config(backbone_cfg)
+        self.backbone, features = load_backbone_from_config(
+            backbone_cfg, pretrained=pretrained
+        )
         self.classifier = nn.Linear(features, 4)
 
     def forward(self, x):
@@ -110,3 +135,42 @@ class RotationClassifier(L.LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
+
+
+def train_rotation_classifier(cfg):
+    """Train the rotation classifier using a Hydra configuration."""
+    backbone_config_path = (
+        Path(__file__).resolve().parents[2] / "configs" / "backbone.yaml"
+    )
+    backbone_cfg = get_backbone_config(cfg.model.backbone, backbone_config_path)
+
+    model = RotationClassifier(
+        backbone_cfg, lr=cfg.model.lr, pretrained=cfg.model.pretrained
+    )
+
+    datamodule = RotationDataModule(
+        image_dir=cfg.data.landmarks.dataset_dir,
+        batch_size=cfg.datamodule.batch_size,
+        img_size=cfg.datamodule.img_size,
+        num_workers=cfg.datamodule.num_workers,
+    )
+
+    mlf_logger = L.pytorch.loggers.MLFlowLogger(
+        experiment_name="rotation-classifier", tracking_uri=cfg.mlflow.tracking_uri
+    )
+
+    trainer = L.Trainer(
+        max_epochs=cfg.trainer.max_epochs,
+        accelerator=cfg.trainer.accelerator,
+        devices=cfg.trainer.devices,
+        callbacks=[
+            L.pytorch.callbacks.ModelCheckpoint(
+                monitor="val_acc", mode="max", save_top_k=1
+            ),
+            L.pytorch.callbacks.LearningRateMonitor(logging_interval="epoch"),
+        ],
+        logger=mlf_logger,
+    )
+
+    trainer.fit(model, datamodule=datamodule)
+    return trainer
