@@ -16,3 +16,6 @@ datamodule:
   batch_size: 64
   img_size: 128
   num_workers: 4
+
+mlflow:
+  tracking_uri: http://127.0.0.1:8080
